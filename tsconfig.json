@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "target": "ES6",
+        "moduleResolution": "Node",
+        "sourceMap": true,
+        "noUnusedLocals": true,
+        "module": "ESNext"
+    }
+}
