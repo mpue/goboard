@@ -1,6 +1,8 @@
 
 # Go Board in the Browser
 
+<img src="game.png" width="600px"/>
+
 ## Overview
 
 This project is a browser-based implementation of the board game **Go (Weiqi/Baduk)** written in **TypeScript** using **HTML5 Canvas** for rendering. The application includes basic Go gameplay, a simple AI opponent, and interactive features to support various board sizes and game modes.
