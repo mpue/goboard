@@ -1,4 +1,28 @@
 
+# Go Board in the Browser
+
+## Overview
+
+This project is a browser-based implementation of the board game **Go (Weiqi/Baduk)** written in **TypeScript** using **HTML5 Canvas** for rendering. The application includes basic Go gameplay, a simple AI opponent, and interactive features to support various board sizes and game modes.
+
+## Features
+
+- Playable Go board with 9x9, 13x13, or 19x19 sizes  
+- Manual play and AI opponent (Minimax-based)  
+- AI vs. AI simulation mode  
+- Capture detection including sound effects when stones are removed  
+- Ko rule and suicide prevention implemented  
+- Score counting based on territory and captured stones  
+- Responsive and dark mode–friendly user interface  
+- Visually enhanced board and stones with lighting effects  
+
+## Technologies Used
+
+- TypeScript  
+- HTML5 Canvas  
+- JavaScript Modules (ES6)  
+- CSS (inline styling in HTML)  
+
 ## Getting Started
 
 1. Clone or download this repository.  
