@@ -76,39 +76,40 @@ export class Board {
         return { x, y };
     }
     drawPiece(ctx, x, y, radius, color) {
-        ctx.save(); // 🎯 Zustand speichern
-        // **Schatten für 3D-Effekt**
-        ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
-        ctx.shadowBlur = 10;
-        ctx.shadowOffsetX = 4;
-        ctx.shadowOffsetY = 4;
-        // **Farbverlauf für realistischen Stein-Look**
+        ctx.save();
+        // Schatten für Tiefe
+        ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetX = 3;
+        ctx.shadowOffsetY = 3;
+        // Realistischer Stein-Look
         let gradient = ctx.createRadialGradient(x - radius / 3, y - radius / 3, radius / 8, x, y, radius);
         if (color === "white") {
-            gradient.addColorStop(0, "#ffffff"); // Heller Mittelpunkt
-            gradient.addColorStop(1, "#cccccc"); // Weicher Grauton für Tiefeneffekt
+            gradient.addColorStop(0, "#ffffff");
+            gradient.addColorStop(1, "#cccccc");
         }
         else {
-            gradient.addColorStop(0, "#111111"); // Sanftes Schwarz
-            gradient.addColorStop(1, "#000000"); // Dunkler Rand für Volumen
+            gradient.addColorStop(0, "#222222"); // Glänzenderes Schwarz
+            gradient.addColorStop(0.5, "#000000"); // Tiefschwarz
+            gradient.addColorStop(1, "#111111"); // Randtiefe
         }
         ctx.fillStyle = gradient;
         ctx.beginPath();
         ctx.arc(x, y, radius, 0, Math.PI * 2);
         ctx.fill();
-        // **Lichtreflexion für edlen Glanz**
-        let reflectionGradient = ctx.createRadialGradient(x - radius / 4, y - radius / 4, radius / 10, x, y, radius);
-        reflectionGradient.addColorStop(0, "rgba(255, 255, 255, 0.9)"); // Starke Reflexion
-        reflectionGradient.addColorStop(1, "rgba(255, 255, 255, 0)"); // Verlauf ins Nichts
+        // Lichtreflexion für Glanz
+        let reflectionGradient = ctx.createRadialGradient(x - radius / 4, y - radius / 4, radius / 12, x, y, radius);
+        reflectionGradient.addColorStop(0, "rgba(255, 255, 255, 0.7)");
+        reflectionGradient.addColorStop(1, "rgba(255, 255, 255, 0)");
         ctx.fillStyle = reflectionGradient;
         ctx.fill();
-        // **Sanfter Rand statt harter schwarzer Linie**
+        // Sanfter Rand für Volumen
         let edgeGradient = ctx.createRadialGradient(x, y, radius * 0.7, x, y, radius);
         edgeGradient.addColorStop(0, "rgba(0, 0, 0, 0)");
-        edgeGradient.addColorStop(1, "rgba(0, 0, 0, 0.5)"); // Weiche Kante
+        edgeGradient.addColorStop(1, "rgba(0, 0, 0, 0.4)");
         ctx.fillStyle = edgeGradient;
         ctx.fill();
-        ctx.restore(); // Zustand zurücksetzen
+        ctx.restore();
     }
     drawGrid(ctx, boardSize, gridSize) {
         ctx.strokeStyle = "#000";
@@ -183,7 +184,7 @@ export class Board {
                 bestMove = this.getRandomOpeningMove();
             }
             else {
-                bestMove = this.model.getBestMoveMinimax(this.model.getCurrentPlayer(), 2);
+                bestMove = this.model.getBestMoveMinimax(this.model.getCurrentPlayer(), 5);
             }
             if (bestMove && this.model.setCell(bestMove.x, bestMove.y, this.model.getCurrentPlayer())) {
                 this.clickSound.play();

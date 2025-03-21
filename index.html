@@ -1,26 +1,99 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />   
-    <title>Go Board</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Go Board – Dark Mode</title>
+
+  <style>
+    :root {
+      --bg-color: #121212;
+      --text-color: #f0f0f0;
+      --highlight-color: #a66b28;
+      --button-bg: #2a2a2a;
+      --button-hover: #3a3a3a;
+      --canvas-border: #555;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    #controls {
+      margin-bottom: 15px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    label,
+    select,
+    button,
+    p {
+      font-size: 16px;
+    }
+
+    select,
+    button {
+      background-color: var(--button-bg);
+      color: var(--text-color);
+      border: 1px solid var(--canvas-border);
+      border-radius: 4px;
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover,
+    select:hover {
+      background-color: var(--button-hover);
+    }
+
+    #score {
+      font-weight: bold;
+      margin: 12px 0;
+    }
+
+    canvas {
+      border: 2px solid var(--canvas-border);
+      background-color: #2f1f0f; /* dunkles Brett (holzartig) */
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.6);
+    }
+  </style>
 </head>
 <body>
-    <label for="board-size">Brettgröße auswählen:</label>
-    <select id="board-size">
-        <option value="9">9 x 9</option>
-        <option value="13">13 x 13</option>
-        <option value="19" selected>19 x 19</option>
-    </select>
-    <button id="new-game">Neues Spiel starten</button>
-    <button id="clear">Clear</button>
-    <button id="ai-vs-ai">KI vs. KI</button>
-    <p id="score">Weiß: 0 | Schwarz: 0</p>
-    <canvas id="canvas"></canvas>
+  <h1>♟️ Go </h1>
 
-    <script type="module" src="./main.js"></script>
+  <div id="controls">
+    <label for="board-size">Brettgröße:</label>
+    <select id="board-size">
+      <option value="9">9 x 9</option>
+      <option value="13">13 x 13</option>
+      <option value="19" selected>19 x 19</option>
+    </select>
+    <button id="new-game">Neues Spiel</button>
+    <button id="clear">Zurücksetzen</button>
+    <button id="ai-vs-ai">KI vs. KI</button>
+  </div>
+
+  <p id="score">Weiß: 0 | Schwarz: 0</p>
+  <canvas id="canvas"></canvas>
+
+  <script type="module" src="./main.js"></script>
 </body>
 </html>
