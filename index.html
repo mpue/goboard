@@ -9,8 +9,14 @@
     <title>Go Board</title>
 </head>
 <body>
+    <label for="board-size">Brettgröße auswählen:</label>
+    <select id="board-size">
+        <option value="9">9 x 9</option>
+        <option value="13">13 x 13</option>
+        <option value="19" selected>19 x 19</option>
+    </select>
+    <button id="new-game">Neues Spiel starten</button>
     <button id="clear">Clear</button>
-    <button id="ai-move">Start game</button>
     <button id="ai-vs-ai">KI vs. KI</button>
     <p id="score">Weiß: 0 | Schwarz: 0</p>
     <canvas id="canvas"></canvas>

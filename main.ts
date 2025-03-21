@@ -1,55 +1,50 @@
-import { BoardModel } from "./BoardModel.js";
+import { BoardController } from "./BoardController.js";
 
 export class Board {
     private canvas: HTMLCanvasElement;
     private context: CanvasRenderingContext2D;
-    private model: BoardModel;
+    private model: BoardController;
     private boardSize = 800;
     private borderSize = 40; // Rand in Pixeln
+
+    private clickSound = new Audio('click.wav');
+    private captureSound  = new Audio('cash.wav');
+    private isMakingMove: boolean = false;
 
     // Ergänzung zur Klasse Board (innerhalb der Klasse Board einfügen)
 
     private aiVsAiActive: boolean = false; // Flag, ob KI vs KI läuft
 
-    // Neuer Button zum Umschalten KI vs KI
-    private createAiVsAiButton() {
-        document.getElementById("ai-vs-ai")?.addEventListener("click", () => {
-            this.aiVsAiActive = !this.aiVsAiActive;
-            const button = document.getElementById("ai-vs-ai")!;
-            button.innerText = this.aiVsAiActive ? "KI-Spiel stoppen" : "KI gegen sich selbst spielen";
-
-            if (this.aiVsAiActive) {
-                this.aiVsAiMove(); // Startet automatisches Spielen
-            }
-        });
-    }
-
-    // KI spielt automatisch gegen sich selbst
     private aiVsAiMove() {
         if (!this.aiVsAiActive || this.model.isGameOver()) {
-            this.aiVsAiActive = false; // stoppt automatisch, wenn Spiel endet
+            this.aiVsAiActive = false;
             document.getElementById("ai-vs-ai")!.innerText = "KI gegen sich selbst spielen";
             return;
         }
-
+    
+        if (this.isMakingMove) return; // Schutz gegen parallele Ausführung
+        this.isMakingMove = true;
+    
         setTimeout(() => {
             let bestMove;
-
+    
             if (this.getMoveCount() < 3) {
                 bestMove = this.getRandomOpeningMove();
             } else {
                 bestMove = this.model.getBestMoveMinimax(this.model.getCurrentPlayer(), 4);
             }
-
+    
             if (bestMove && this.model.setCell(bestMove.x, bestMove.y, this.model.getCurrentPlayer())) {
+                this.clickSound.play();
                 this.render();
                 this.updateScore();
             }
-
+    
+            this.isMakingMove = false; // Sperre wieder freigeben
             this.aiVsAiMove(); // nächster Zug automatisch
-        }, 250); // Verzögerung zwischen den KI-Zügen
+        }, 250);
     }
-
+    
 
     constructor(public size: number) {
         let canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -61,14 +56,12 @@ export class Board {
 
         this.canvas = canvas;
         this.context = context;
-        this.model = new BoardModel(size);
+        this.model = new BoardController(size);
 
         this.canvas.width = this.boardSize + this.borderSize * 2;
         this.canvas.height = this.boardSize + this.borderSize * 2;
 
         this.render();
-        this.createUserEvents();
-        this.createAiVsAiButton();
     }
 
     public render() {
@@ -142,7 +135,7 @@ export class Board {
         ctx.fillStyle = edgeGradient;
         ctx.fill();
 
-        ctx.restore(); // 🎯 Zustand zurücksetzen
+        ctx.restore(); // Zustand zurücksetzen
     }
 
 
@@ -172,27 +165,6 @@ export class Board {
                     let color = cellValue === 1 ? "white" : "black";
                     this.drawPiece(this.context, pos.x, pos.y, stepSize / 2.5, color);
                 }
-            }
-        }
-    }
-
-    private createUserEvents() {
-        this.canvas.addEventListener("mousedown", (e) => this.pressEventHandler(e));
-        document.getElementById("clear")?.addEventListener("click", () => this.clearCanvas());
-        document.getElementById("ai-move")?.addEventListener("click", () => this.aiMove());
-    }
-
-    private pressEventHandler(e: MouseEvent) {
-        let mouseX = e.pageX - this.canvas.offsetLeft;
-        let mouseY = e.pageY - this.canvas.offsetTop;
-        let pos = this.getGridCell(mouseX, mouseY, this.size, 800);
-
-        if (pos.col >= 0 && pos.row >= 0 && this.model.setCell(pos.col, pos.row, this.model.getCurrentPlayer())) {
-            this.render();
-            this.updateScore();
-
-            if (!this.model.isGameOver()) {
-                this.aiMove();
             }
         }
     }
@@ -228,36 +200,38 @@ export class Board {
         }
     }
     
-    private clearCanvas() {
-        this.model.clear();
-        this.model.currentPlayer = 1;
-        this.render();
-    }
-
     private updateScore() {
         let score = this.model.countPoints();
         document.getElementById("score")!.innerText = `Weiß: ${score.white} | Schwarz: ${score.black}`;
     }
-    /** 🤖 Lässt die KI mit Minimax spielen */
-    private aiMove() {
-        setTimeout(() => {
-            if (this.model.isGameOver()) return;
 
+    private aiMove() {
+        if (this.isMakingMove) return;
+        this.isMakingMove = true;
+    
+        setTimeout(() => {
+            if (this.model.isGameOver()) {
+                this.isMakingMove = false;
+                return;
+            }
+    
             let bestMove;
             if (this.getMoveCount() < 3) {
                 bestMove = this.getRandomOpeningMove();
             } else {
                 bestMove = this.model.getBestMoveMinimax(this.model.getCurrentPlayer(), 2);
             }
-
-            if (bestMove) {
-                if (this.model.setCell(bestMove.x, bestMove.y, this.model.getCurrentPlayer())) {
-                    this.render();
-                    this.updateScore();
-                }
+    
+            if (bestMove && this.model.setCell(bestMove.x, bestMove.y, this.model.getCurrentPlayer())) {
+                this.clickSound.play();
+                this.render();
+                this.updateScore();
             }
+    
+            this.isMakingMove = false;
         }, 500);
     }
+    
 
     /** 🏆 Zählt die bisher gespielten Züge */
     private getMoveCount(): number {
@@ -270,7 +244,7 @@ export class Board {
         return count;
     }
 
-    /** 🎲 Gibt zufällige Startzüge in einer bestimmten Zone */
+    /** Gibt zufällige Startzüge in einer bestimmten Zone */
     private getRandomOpeningMove(): { x: number, y: number } {
         let size = this.model.grid.length;
         let range = Math.floor(size * 0.4); // Spiele innerhalb von 40% des Felds
@@ -280,6 +254,75 @@ export class Board {
         return { x, y };
     }
 
+    public clearCanvas() {
+        this.model.clear();
+        this.model.currentPlayer = 1;
+        this.render();
+        this.updateScore();
+    }
+    public pressEventHandler(e: MouseEvent) {
+        let mouseX = e.pageX - this.canvas.offsetLeft;
+        let mouseY = e.pageY - this.canvas.offsetTop;
+        let pos = this.getGridCell(mouseX, mouseY, this.size, 800);
+    
+        const result = this.model.setCell(pos.col, pos.row, this.model.getCurrentPlayer());
+    
+        if (pos.col >= 0 && pos.row >= 0 && result.success) {
+            if (result.stonesRemoved) {
+                this.captureSound.play(); // 🔊 Sound für entfernte Steine
+            } else {
+                this.clickSound.play();   // ✅ Normaler Zug
+            }
+    
+            this.render();
+            this.updateScore();
+    
+            if (!this.model.isGameOver()) {
+                this.aiMove();
+            }
+        }
+    }
+    
+    
+    public toggleAiVsAi() {
+        this.aiVsAiActive = !this.aiVsAiActive;
+        const button = document.getElementById("ai-vs-ai")!;
+        button.innerText = this.aiVsAiActive ? "KI-Spiel stoppen" : "KI gegen sich selbst spielen";
+    
+        if (this.aiVsAiActive) {
+            this.aiVsAiMove();
+        }
+    }
+   
+
 }
 
-new Board(19);
+const boardSizeSelect = document.getElementById("board-size") as HTMLSelectElement;
+const newGameButton = document.getElementById("new-game")!;
+const clearButton = document.getElementById("clear")!;
+const aiVsAiButton = document.getElementById("ai-vs-ai")!;
+const canvas = document.getElementById("canvas") as HTMLCanvasElement;
+
+let board: Board | null = null;
+let selectedSize: number = parseInt(boardSizeSelect.value);
+
+boardSizeSelect.addEventListener("change", () => {
+    selectedSize = parseInt(boardSizeSelect.value);
+});
+
+newGameButton.addEventListener("click", () => {
+    board = new Board(selectedSize);
+});
+
+clearButton.addEventListener("click", () => {
+    if (board) board.clearCanvas();
+});
+
+aiVsAiButton.addEventListener("click", () => {
+    if (!board) board = new Board(selectedSize);
+    board.toggleAiVsAi(); // Methode werden wir gleich hinzufügen
+});
+
+canvas.addEventListener("mousedown", (e) => {
+    if (board) board.pressEventHandler(e);
+});
